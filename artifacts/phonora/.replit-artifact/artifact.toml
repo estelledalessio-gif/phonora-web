@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Phonora"
+version = "1.0.0"
+id = "artifacts/phonora"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23180
+
+[services.development]
+run = "pnpm --filter @workspace/phonora run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/phonora", "run", "build" ]
+publicDir = "artifacts/phonora/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23180"
+BASE_PATH = "/"

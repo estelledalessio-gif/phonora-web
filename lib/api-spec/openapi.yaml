@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Phonora pronunciation coaching API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Auth & profile operations
+  - name: ipa
+    description: IPA sound library
+  - name: practice
+    description: Practice sessions
+  - name: assessment
+    description: Pronunciation assessment
+  - name: dashboard
+    description: Dashboard summaries
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +33,317 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/profile:
+    get:
+      operationId: getProfile
+      tags: [auth]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized
+    patch:
+      operationId: updateProfile
+      tags: [auth]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /auth/settings:
+    get:
+      operationId: getSettings
+      tags: [auth]
+      summary: Get user settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+    patch:
+      operationId: updateSettings
+      tags: [auth]
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsBody"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+
+  /ipa/sounds:
+    get:
+      operationId: listIpaSounds
+      tags: [ipa]
+      summary: List all IPA sounds
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of IPA sounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IpaSound"
+
+  /ipa/sounds/{id}:
+    get:
+      operationId: getIpaSound
+      tags: [ipa]
+      summary: Get a single IPA sound by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: IPA sound
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpaSound"
+        "404":
+          description: Not found
+
+  /ipa/lookup:
+    post:
+      operationId: lookupPronunciation
+      tags: [ipa]
+      summary: CMUdict-based pronunciation lookup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LookupPronunciationBody"
+      responses:
+        "200":
+          description: Pronunciation lookup results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WordPronunciation"
+
+  /practice/attempts:
+    get:
+      operationId: listPracticeAttempts
+      tags: [practice]
+      summary: List practice attempts for current user
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Practice attempts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PracticeAttempt"
+    post:
+      operationId: createPracticeAttempt
+      tags: [practice]
+      summary: Store a practice attempt result
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePracticeAttemptBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PracticeAttempt"
+
+  /practice/attempts/{id}:
+    get:
+      operationId: getPracticeAttempt
+      tags: [practice]
+      summary: Get a single practice attempt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Practice attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PracticeAttempt"
+        "404":
+          description: Not found
+
+  /practice/saved-texts:
+    get:
+      operationId: listSavedTexts
+      tags: [practice]
+      summary: List saved practice texts
+      responses:
+        "200":
+          description: Saved texts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavedText"
+    post:
+      operationId: createSavedText
+      tags: [practice]
+      summary: Save a practice text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSavedTextBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedText"
+
+  /practice/saved-texts/{id}:
+    delete:
+      operationId: deleteSavedText
+      tags: [practice]
+      summary: Delete a saved text
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /assessment/score:
+    post:
+      operationId: assessPronunciation
+      tags: [assessment]
+      summary: Score a pronunciation recording
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentRequest"
+      responses:
+        "200":
+          description: Assessment result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentResult"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats for current user
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/activity:
+    get:
+      operationId: getDailyActivity
+      tags: [dashboard]
+      summary: Get daily activity for streak calendar
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Daily activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyActivity"
+
+  /dashboard/recent-attempts:
+    get:
+      operationId: getRecentAttempts
+      tags: [dashboard]
+      summary: Get recent practice attempts for dashboard
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recent attempts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PracticeAttempt"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +354,438 @@ components:
       required:
         - status
 
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        nativeLanguage:
+          type: ["string", "null"]
+        targetAccent:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        streakDays:
+          type: integer
+        totalAttempts:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - streakDays
+        - totalAttempts
+        - createdAt
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        displayName:
+          type: ["string", "null"]
+        nativeLanguage:
+          type: ["string", "null"]
+        targetAccent:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+
+    UserSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        theme:
+          type: string
+        audioInputDeviceId:
+          type: ["string", "null"]
+        showPhonemeBreakdown:
+          type: boolean
+        enableStreakReminders:
+          type: boolean
+        dailyGoalMinutes:
+          type: integer
+      required:
+        - id
+        - userId
+        - theme
+        - showPhonemeBreakdown
+        - enableStreakReminders
+        - dailyGoalMinutes
+
+    UpdateSettingsBody:
+      type: object
+      properties:
+        theme:
+          type: string
+        audioInputDeviceId:
+          type: ["string", "null"]
+        showPhonemeBreakdown:
+          type: boolean
+        enableStreakReminders:
+          type: boolean
+        dailyGoalMinutes:
+          type: integer
+
+    IpaSound:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        articulationGuide:
+          type: string
+        exampleWords:
+          type: array
+          items:
+            type: string
+        minimialPairs:
+          type: array
+          items:
+            type: string
+        difficulty:
+          type: string
+        audioUrl:
+          type: ["string", "null"]
+      required:
+        - id
+        - symbol
+        - name
+        - category
+        - description
+        - articulationGuide
+        - exampleWords
+        - minimialPairs
+        - difficulty
+
+    WordPronunciation:
+      type: object
+      properties:
+        word:
+          type: string
+        pronunciations:
+          type: array
+          items:
+            type: string
+        found:
+          type: boolean
+      required:
+        - word
+        - pronunciations
+        - found
+
+    LookupPronunciationBody:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+        - text
+
+    PracticeAttempt:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        practiceText:
+          type: string
+        practiceType:
+          type: string
+        overallScore:
+          type: ["number", "null"]
+        accuracyScore:
+          type: ["number", "null"]
+        fluencyScore:
+          type: ["number", "null"]
+        completenessScore:
+          type: ["number", "null"]
+        transcript:
+          type: ["string", "null"]
+        likelySubstitutions:
+          type: array
+          items:
+            type: object
+            properties:
+              expected:
+                type: string
+              actual:
+                type: string
+              word:
+                type: string
+            required:
+              - expected
+              - actual
+              - word
+        phonemeFeedback:
+          type: array
+          items:
+            type: object
+            properties:
+              phoneme:
+                type: string
+              score:
+                type: number
+              tip:
+                type: string
+            required:
+              - phoneme
+              - score
+              - tip
+        articulatoryTips:
+          type: array
+          items:
+            type: string
+        ipaBreakdown:
+          type: ["string", "null"]
+        durationMs:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - practiceText
+        - practiceType
+        - likelySubstitutions
+        - phonemeFeedback
+        - articulatoryTips
+        - createdAt
+
+    CreatePracticeAttemptBody:
+      type: object
+      properties:
+        practiceText:
+          type: string
+        practiceType:
+          type: string
+        overallScore:
+          type: ["number", "null"]
+        accuracyScore:
+          type: ["number", "null"]
+        fluencyScore:
+          type: ["number", "null"]
+        completenessScore:
+          type: ["number", "null"]
+        transcript:
+          type: ["string", "null"]
+        likelySubstitutions:
+          type: array
+          items:
+            type: object
+            properties:
+              expected:
+                type: string
+              actual:
+                type: string
+              word:
+                type: string
+            required:
+              - expected
+              - actual
+              - word
+        phonemeFeedback:
+          type: array
+          items:
+            type: object
+            properties:
+              phoneme:
+                type: string
+              score:
+                type: number
+              tip:
+                type: string
+            required:
+              - phoneme
+              - score
+              - tip
+        articulatoryTips:
+          type: array
+          items:
+            type: string
+        ipaBreakdown:
+          type: ["string", "null"]
+        durationMs:
+          type: ["integer", "null"]
+      required:
+        - practiceText
+        - practiceType
+        - likelySubstitutions
+        - phonemeFeedback
+        - articulatoryTips
+
+    SavedText:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        label:
+          type: string
+        text:
+          type: string
+        practiceType:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - label
+        - text
+        - practiceType
+        - createdAt
+
+    CreateSavedTextBody:
+      type: object
+      properties:
+        label:
+          type: string
+        text:
+          type: string
+        practiceType:
+          type: string
+      required:
+        - label
+        - text
+        - practiceType
+
+    AssessmentRequest:
+      type: object
+      properties:
+        audioBase64:
+          type: string
+        referenceText:
+          type: string
+        practiceType:
+          type: string
+      required:
+        - audioBase64
+        - referenceText
+        - practiceType
+
+    AssessmentResult:
+      type: object
+      properties:
+        overallScore:
+          type: number
+        accuracyScore:
+          type: number
+        fluencyScore:
+          type: number
+        completenessScore:
+          type: number
+        transcript:
+          type: string
+        likelySubstitutions:
+          type: array
+          items:
+            type: object
+            properties:
+              expected:
+                type: string
+              actual:
+                type: string
+              word:
+                type: string
+            required:
+              - expected
+              - actual
+              - word
+        phonemeFeedback:
+          type: array
+          items:
+            type: object
+            properties:
+              phoneme:
+                type: string
+              score:
+                type: number
+              tip:
+                type: string
+            required:
+              - phoneme
+              - score
+              - tip
+        articulatoryTips:
+          type: array
+          items:
+            type: string
+      required:
+        - overallScore
+        - accuracyScore
+        - fluencyScore
+        - completenessScore
+        - transcript
+        - likelySubstitutions
+        - phonemeFeedback
+        - articulatoryTips
+
+    DashboardSummary:
+      type: object
+      properties:
+        streakDays:
+          type: integer
+        totalAttempts:
+          type: integer
+        todayAttempts:
+          type: integer
+        weekAttempts:
+          type: integer
+        avgScoreWeek:
+          type: ["number", "null"]
+        avgScoreAllTime:
+          type: ["number", "null"]
+        topPracticedSounds:
+          type: array
+          items:
+            type: object
+            properties:
+              symbol:
+                type: string
+              count:
+                type: integer
+            required:
+              - symbol
+              - count
+        lastPracticeAt:
+          type: ["string", "null"]
+          format: date-time
+      required:
+        - streakDays
+        - totalAttempts
+        - todayAttempts
+        - weekAttempts
+        - topPracticedSounds
+
+    DailyActivity:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        count:
+          type: integer
+        avgScore:
+          type: ["number", "null"]
+      required:
+        - date
+        - count

@@ -1,0 +1,101 @@
+Build a production-style web MVP called Phonora.
+
+Tech stack:
+- Next.js latest with App Router
+- TypeScript
+- Tailwind CSS
+- Supabase for auth, database, and storage
+- Vercel-ready deployment
+- Clean component structure
+- Mobile-first responsive design
+- Dark/light theme support
+- No mock backend; use real Supabase integration
+- Use server actions or route handlers where appropriate
+- Use shadcn/ui components if useful
+
+Business goal:
+Phonora is a pronunciation coaching app for non-native speakers who want a more native-like American English accent.
+
+Required auth for this MVP:
+- Email/password
+- Google sign-in
+Do NOT implement Apple sign-in yet.
+
+Required app pages:
+1. Landing page
+2. Login page
+3. Signup page
+4. Dashboard page
+5. IPA library page
+6. IPA sound detail page
+7. Practice page
+8. Results/history page
+9. Profile/settings page
+
+Core product behavior:
+- Users can browse an American English IPA library
+- Each sound has a symbol, category, description, articulation guidance, example words, and optional audio/animation placeholders
+- Users can practice a single sound, a word, a phrase, or a sentence
+- Users can type custom text into the practice input
+- For now, map typed American English words to pronunciation using a CMUdict-based lookup layer
+- If a word has multiple pronunciations, show a selector so the user can choose one
+- If a word is not found, display “IPA unavailable yet”
+- Store all practice attempts in Supabase
+- Track daily streaks and practice counts
+- Show recent activity on dashboard
+
+Pronunciation assessment architecture:
+- Create a route handler placeholder for Azure Speech Pronunciation Assessment
+- The app should be fully wired so that audio recording works and the request payload is sent to the API route
+- For now, if Azure env vars are missing, return a mocked result with the same JSON shape the real service would return
+- Keep the result JSON structure stable
+
+Required result fields:
+- overallScore
+- accuracyScore
+- fluencyScore
+- completenessScore
+- likelySubstitutions
+- phonemeFeedback
+- articulatoryTips
+- transcript
+
+UI details:
+- Home page should feel polished, modern, and premium-academic
+- Tone: smart, effective, serious coach with a little Duolingo-like motivation
+- Include streak card, recent attempts, and quick practice buttons
+- Mobile-first because this will later become an iPhone app
+
+Database assumptions:
+Use the following Supabase tables already created:
+profiles
+user_settings
+ipa_sounds
+practice_attempts
+daily_activity
+saved_texts
+
+Environment variables:
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+AZURE_SPEECH_KEY
+AZURE_SPEECH_REGION
+
+Please generate:
+- complete project structure
+- all pages
+- components
+- Supabase client files
+- route handlers
+- audio recorder component
+- CMUdict lookup utility stub
+- IPA data seed file for a starter American English sound inventory
+- clean README with local setup and Vercel deploy steps
+
+Important:
+- make no fake claims about mouth tracking
+- phrase feedback as inferred pronunciation coaching
+- code must compile
+- no placeholder lorem ipsum
+- include tasteful seed data for at least 15 American English sounds

@@ -12,7 +12,7 @@ Phonora is a full-stack pronunciation coaching web app that helps non-native spe
 - **TypeScript version**: 5.9
 - **Frontend**: React + Vite (Tailwind CSS, Radix UI, Framer Motion, Wouter)
 - **Backend**: Express 5 + Drizzle ORM + PostgreSQL
-- **Auth**: JWT (email/password + Google OAuth placeholder)
+- **Auth**: Supabase Auth (email/password + Google OAuth via Supabase, Supabase JWT verification on backend)
 - **API codegen**: Orval (from OpenAPI spec in `lib/api-spec/openapi.yaml`)
 - **State**: Zustand (auth store) + React Query (data fetching)
 - **Validation**: Zod (`zod/v4`)
@@ -24,7 +24,7 @@ Phonora is a full-stack pronunciation coaching web app that helps non-native spe
 
 ## Database Tables
 
-- `users` — auth credentials (email, password_hash, google_id)
+- `users` — (legacy; auth is now delegated to Supabase Auth; user identity is the Supabase `auth.users` UUID)
 - `profiles` — user profile (display_name, native_language, target_accent, streak_days, total_attempts)
 - `user_settings` — preferences (theme, daily_goal_minutes, show_phoneme_breakdown)
 - `ipa_sounds` — IPA library (symbol, name, category, description, articulation_guide, example_words)

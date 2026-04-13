@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,22 +15,41 @@ import Practice from "@/pages/Practice";
 import Results from "@/pages/Results";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
+import AuthCallback from "@/pages/AuthCallback";
+import { useAuth, useAuthInit } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!isAuthenticated) return <Redirect to="/login" />;
+  return <Component />;
+}
+
 function Router() {
+  useAuthInit();
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
-        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/auth/callback" component={AuthCallback} />
+        <Route path="/dashboard">
+          {() => <ProtectedRoute component={Dashboard} />}
+        </Route>
         <Route path="/ipa" component={IpaLibrary} />
         <Route path="/ipa/:id" component={IpaDetail} />
-        <Route path="/practice" component={Practice} />
-        <Route path="/results" component={Results} />
-        <Route path="/settings" component={Settings} />
+        <Route path="/practice">
+          {() => <ProtectedRoute component={Practice} />}
+        </Route>
+        <Route path="/results">
+          {() => <ProtectedRoute component={Results} />}
+        </Route>
+        <Route path="/settings">
+          {() => <ProtectedRoute component={Settings} />}
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </Layout>

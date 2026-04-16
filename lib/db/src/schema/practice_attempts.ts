@@ -17,6 +17,7 @@ export const practiceAttemptsTable = pgTable("practice_attempts", {
   articulatoryTips: text("articulatory_tips").array().notNull().default([]),
   ipaBreakdown: text("ipa_breakdown"),
   durationMs: integer("duration_ms"),
+  feedbackJson: jsonb("feedback_json"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

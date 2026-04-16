@@ -5,6 +5,7 @@ import ipaRouter from "./ipa";
 import practiceRouter from "./practice";
 import assessmentRouter from "./assessment";
 import dashboardRouter from "./dashboard";
+import pronunciationRouter from "./pronunciation";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(ipaRouter);
 router.use(practiceRouter);
 router.use(assessmentRouter);
 router.use(dashboardRouter);
+router.use(pronunciationRouter);
 
 export default router;

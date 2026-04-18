@@ -90,21 +90,30 @@ export default function Results() {
                       </div>
 
                       {/* Phoneme Feedback */}
-                      {attempt.phonemeFeedback && attempt.phonemeFeedback.length > 0 && (
+                      {attempt.phonemeFeedback && (attempt.phonemeFeedback as any[]).length > 0 && (
                         <div>
                           <h4 className="font-bold text-sm uppercase tracking-wider text-primary mb-3">Target Sounds</h4>
                           <div className="grid gap-3 sm:grid-cols-2">
-                            {attempt.phonemeFeedback.map((fb, i) => (
-                              <div key={i} className="flex gap-3 p-3 rounded border bg-card">
-                                <div className={`w-10 h-10 rounded flex items-center justify-center font-serif text-lg font-bold shrink-0 ${getScoreColor(fb.score)}`}>
-                                  {fb.phoneme}
+                            {(attempt.phonemeFeedback as Array<{ phoneme: string; status?: string; score?: number; tip?: string }>).map((fb, i) => {
+                              const statusColorMap: Record<string, string> = {
+                                good: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                                fair: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+                                needs_work: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                              };
+                              const statusLabel = fb.status ?? (fb.score != null ? (fb.score >= 80 ? "good" : fb.score >= 60 ? "fair" : "needs_work") : "good");
+                              const colorClass = statusColorMap[statusLabel] ?? statusColorMap.good;
+                              return (
+                                <div key={i} className="flex gap-3 p-3 rounded border bg-card">
+                                  <div className={`w-10 h-10 rounded flex items-center justify-center font-serif text-lg font-bold shrink-0 ${colorClass}`}>
+                                    {fb.phoneme}
+                                  </div>
+                                  <div className="text-sm">
+                                    <div className="font-medium mb-0.5 capitalize">{statusLabel.replace("_", " ")}</div>
+                                    <p className="text-muted-foreground text-xs leading-relaxed">{fb.tip ?? "—"}</p>
+                                  </div>
                                 </div>
-                                <div className="text-sm">
-                                  <div className="font-medium mb-0.5">Score: {Math.round(fb.score)}</div>
-                                  <p className="text-muted-foreground text-xs leading-relaxed">{fb.tip}</p>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}

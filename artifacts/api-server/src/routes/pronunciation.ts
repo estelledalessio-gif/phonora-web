@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
 import multer from "multer";
-import { desc, and, eq } from "drizzle-orm";
-import { sql } from "drizzle-orm";
+import { desc, and, eq, sql } from "drizzle-orm";
 import { authenticate } from "../middlewares/authenticate";
+import { logger } from "../lib/logger";
 import { db, practiceAttemptsTable, profilesTable, dailyActivityTable } from "@workspace/db";
 import { assessWithAzure, PronunciationResult } from "../lib/azureSpeech";
 
@@ -134,14 +134,14 @@ router.post(
         result    = await assessWithAzure(req.file.buffer, referenceText, azureKey, azureRegion);
         usedAzure = true;
       } catch (err) {
-        req.log.warn({ err }, "Azure pronunciation assessment failed — using mock result");
+        logger.warn({ err }, "Azure pronunciation assessment failed — using mock result");
         result = buildMockResult(referenceText);
       }
     } else {
       if (!azureKey || !azureRegion) {
-        req.log.info("Azure credentials absent — using mock result");
+        logger.info("Azure credentials absent — using mock result");
       } else if (!req.file?.buffer.length) {
-        req.log.warn("No audio received — using mock result");
+        logger.warn("No audio received — using mock result");
       }
       result = buildMockResult(referenceText);
     }
